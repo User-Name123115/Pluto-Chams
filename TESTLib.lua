@@ -145,7 +145,7 @@ local function ToggleUI()
         for _, window in pairs(TurtleUiLib:GetDescendants()) do
             if window:IsA("Frame") then
                 FadeOut(window, 0.2)
-            elseif window:IsA("TextLabel") or window:IsA("TextButton") then
+            elseif window:IsA("TextLabel") or window:IsA("TextButton") or window:IsA("TextBox") then
                 FadeOutText(window, 0.2)
             end
         end
@@ -175,7 +175,7 @@ local function ToggleUI()
             if window:IsA("Frame") then
                 window.BackgroundTransparency = 1
                 FadeIn(window, 0.3)
-            elseif window:IsA("TextLabel") or window:IsA("TextButton") then
+            elseif window:IsA("TextLabel") or window:IsA("TextButton") or window:IsA("TextBox") then
                 window.TextTransparency = 1
                 FadeInText(window, 0.3)
             end
@@ -334,6 +334,13 @@ function library:Window(name)
         end)
 
         pastSliders[winCount] = false
+        
+        -- Initialize with fade
+        Button.TextTransparency = 1
+        spawn(function()
+            wait(0.1 * winCount + 0.05)
+            FadeInText(Button, 0.3)
+        end)
     end
     
     function functions:Label(text, color)
@@ -364,13 +371,23 @@ function library:Window(name)
                     Label.TextColor3 = Color3.fromHSV(hue, 1, 1)
                 end
             end)
+        else
+            Label.TextColor3 = color
         end
         pastSliders[winCount] = false
+        
+        -- Initialize with fade
+        Label.TextTransparency = 1
+        spawn(function()
+            wait(0.1 * winCount + 0.05)
+            FadeInText(Label, 0.3)
+        end)
         
         return Label
     end
     
-    function functions:Toggle(text, on, callback)
+    function functions:Toggle(text, default, callback)
+        local default = default or false
         local callback = callback or function() end
 
         sizes[winCount] = sizes[winCount] + 34
@@ -380,7 +397,6 @@ function library:Window(name)
 
         local ToggleDescription = Instance.new("TextLabel")
         local ToggleButton = Instance.new("TextButton")
-        local ToggleFiller = Instance.new("Frame")
 
         ToggleDescription.Name = "ToggleDescription"
         ToggleDescription.Parent = Window
@@ -398,26 +414,26 @@ function library:Window(name)
 
         ToggleButton.Name = "ToggleButton"
         ToggleButton.Parent = ToggleDescription
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        ToggleButton.BackgroundColor3 = default and Color3.fromRGB(30, 30, 30) or Color3.fromRGB(30, 30, 30)
         ToggleButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
         ToggleButton.BorderSizePixel = 1
         ToggleButton.Position = UDim2.new(0, 145, 0, 3)
         ToggleButton.Size = UDim2.new(0, 50, 0, 22)
         ToggleButton.Font = Enum.Font.Gotham
-        ToggleButton.Text = on and "ON" or "OFF"
-        ToggleButton.TextColor3 = on and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 50, 50)
+        ToggleButton.Text = default and "ON" or "OFF"
+        ToggleButton.TextColor3 = default and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 50, 50)
         ToggleButton.TextSize = 12.000
         ToggleButton.ZIndex = 2 + zindex
         ToggleButton.AutoButtonColor = false
         
         ToggleButton.MouseButton1Up:Connect(function()
-            on = not on
-            ToggleButton.Text = on and "ON" or "OFF"
-            ToggleButton.TextColor3 = on and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 50, 50)
-            TweenService:Create(ToggleButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}):Play()
+            default = not default
+            ToggleButton.Text = default and "ON" or "OFF"
+            ToggleButton.TextColor3 = default and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 50, 50)
+            TweenService:Create(ToggleButton, TweenInfo.new(0.1), {BackgroundColor3 = default and Color3.fromRGB(35, 35, 35) or Color3.fromRGB(35, 35, 35)}):Play()
             wait(0.1)
-            TweenService:Create(ToggleButton, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
-            callback(on)
+            TweenService:Create(ToggleButton, TweenInfo.new(0.1), {BackgroundColor3 = default and Color3.fromRGB(30, 30, 30) or Color3.fromRGB(30, 30, 30)}):Play()
+            callback(default)
         end)
         
         ToggleButton.MouseEnter:Connect(function()
@@ -429,6 +445,15 @@ function library:Window(name)
         end)
 
         pastSliders[winCount] = false
+        
+        -- Initialize with fade
+        ToggleDescription.TextTransparency = 1
+        ToggleButton.TextTransparency = 1
+        spawn(function()
+            wait(0.1 * winCount + 0.05)
+            FadeInText(ToggleDescription, 0.3)
+            FadeInText(ToggleButton, 0.3)
+        end)
     end
     
     function functions:Box(text, callback)
@@ -454,9 +479,6 @@ function library:Window(name)
         TextBox.TextSize = 14.000
         TextBox.TextStrokeColor3 = Color3.fromRGB(245, 246, 250)
         TextBox.ZIndex = 2 + zindex
-        TextBox:GetPropertyChangedSignal('Text'):connect(function()
-            callback(TextBox.Text, false)
-        end)
         TextBox.FocusLost:Connect(function()
             callback(TextBox.Text, true)
         end)
@@ -474,13 +496,22 @@ function library:Window(name)
         BoxDescription.TextXAlignment = Enum.TextXAlignment.Left
         BoxDescription.ZIndex = 2 + zindex
         pastSliders[winCount] = false
+        
+        -- Initialize with fade
+        TextBox.TextTransparency = 1
+        BoxDescription.TextTransparency = 1
+        spawn(function()
+            wait(0.1 * winCount + 0.05)
+            FadeInText(TextBox, 0.3)
+            FadeInText(BoxDescription, 0.3)
+        end)
     end
     
     function functions:Slider(text, min, max, default, callback)
         local text = text or "Slider"
         local min = min or 1
         local max = max or 100
-        local default = default or max/2
+        local default = default or math.floor((min + max) / 2)
         local callback = callback or function() end
         local offset = 70
         if default > max then
@@ -524,8 +555,9 @@ function library:Window(name)
                         SliderButton.Position = UDim2.new(0, xOffset , -1.33333337, 0);
                         SilderFiller.Size = UDim2.new(0, xOffset, 0, 6)
                         local value = Lerp(min, max, SliderButton.Position.X.Offset/(Slider.Size.X.Offset-5))
-                        Current.Text = tostring(math.round(value))
-                        callback(math.round(value))
+                        local roundedValue = math.round(value)
+                        Current.Text = tostring(roundedValue)
+                        callback(roundedValue)
                     else
                         con:Disconnect();
                     end;
@@ -616,6 +648,19 @@ function library:Window(name)
         Max.TextXAlignment = Enum.TextXAlignment.Right
         Max.ZIndex = 2 + zindex
         pastSliders[winCount] = true
+        
+        -- Initialize with fade
+        Description.TextTransparency = 1
+        Current.TextTransparency = 1
+        Min.TextTransparency = 1
+        Max.TextTransparency = 1
+        spawn(function()
+            wait(0.1 * winCount + 0.05)
+            FadeInText(Description, 0.3)
+            FadeInText(Current, 0.3)
+            FadeInText(Min, 0.3)
+            FadeInText(Max, 0.3)
+        end)
 
         local slider = {}
         function slider:SetValue(value)
@@ -629,7 +674,7 @@ function library:Window(name)
         return slider
     end
     
-    function functions:Dropdown(text, buttons, callback, selective)
+    function functions:Dropdown(text, buttons, callback)
         local text = text or "Dropdown"
         local buttons = buttons or {}
         local callback = callback or function() end
@@ -757,10 +802,7 @@ function library:Window(name)
                 callback(name)
                 DropdownFrame.Visible = false
                 DownSign.Rotation = 0
-                if selective then
-                    Dropdown.Text = name
-                    TweenService:Create(Dropdown, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
-                end
+                TweenService:Create(Dropdown, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
             end)
         end
         
@@ -788,11 +830,20 @@ function library:Window(name)
         for i,v in pairs(buttons) do
             dropFunctions:Button(v)
         end
+        
+        -- Initialize with fade
+        Dropdown.TextTransparency = 1
+        DownSign.TextTransparency = 1
+        spawn(function()
+            wait(0.1 * winCount + 0.05)
+            FadeInText(Dropdown, 0.3)
+            FadeInText(DownSign, 0.3)
+        end)
 
         return dropFunctions
     end
 
-    -- Initialize with fade effect
+    -- Initialize window with fade effect
     UiWindow.BackgroundTransparency = 1
     Header.BackgroundTransparency = 1
     Window.BackgroundTransparency = 1
